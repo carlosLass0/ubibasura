@@ -1,0 +1,117 @@
+@page
+@model ReportesModel
+@{
+    ViewData["Title"] = Model.EsAdministrador ? "Administrar reportes" : "Mis reportes";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>@ViewData["Title"]</h1>
+    @if (Model.EsAdministrador)
+    {
+        <a asp-page="/Dashboard" class="btn btn-outline-secondary">Dashboard</a>
+    }
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Mensaje))
+{
+    <div class="alert alert-warning">@Model.Mensaje</div>
+}
+
+@if (Model.EsAdministrador)
+{
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Contenedor</th>
+                    <th>Usuario</th>
+                    <th>Problema</th>
+                    <th>Comentario</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var reporte in Model.ReportesAdmin)
+                {
+                    <tr>
+                        <td>@reporte.CodigoContenedor</td>
+                        <td>@reporte.NombreUsuario<br><small class="text-muted">@reporte.CorreoUsuario</small></td>
+                        <td>@reporte.TipoReporte</td>
+                        <td>@(string.IsNullOrWhiteSpace(reporte.Comentario) ? "Sin comentario" : reporte.Comentario)</td>
+                        <td>@reporte.Fecha.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>
+                            <form method="post" asp-page-handler="ActualizarEstado" class="d-flex gap-2">
+                                <input type="hidden" name="ReporteId" value="@reporte.Id">
+                                <select name="NuevoEstado" class="form-select form-select-sm" aria-label="Estado del reporte @reporte.Id">
+                                    <option value="pendiente" selected="@(reporte.Estado == "pendiente")">Pendiente</option>
+                                    <option value="en_revision" selected="@(reporte.Estado == "en_revision")">En revisión</option>
+                                    <option value="resuelto" selected="@(reporte.Estado == "resuelto")">Resuelto</option>
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-outline-primary">Guardar</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    @if (Model.ReportesAdmin.Count == 0)
+    {
+        <p class="text-muted">Todavía no hay reportes registrados.</p>
+    }
+}
+else
+{
+<form method="post" class="row g-3 mb-4">
+    <div class="col-md-4">
+        <label asp-for="NuevoReporte.ContenedorId" class="form-label">Contenedor</label>
+        <select asp-for="NuevoReporte.ContenedorId" class="form-select" required>
+            <option value="">Selecciona un contenedor</option>
+            @foreach (var contenedor in Model.Contenedores)
+            {
+                <option value="@contenedor.Id">@contenedor.Codigo - @contenedor.Tipo</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-4">
+        <label asp-for="NuevoReporte.TipoReporte" class="form-label">Tipo de problema</label>
+        <select asp-for="NuevoReporte.TipoReporte" class="form-select" required>
+            <option value="">Selecciona un problema</option>
+            <option value="lleno">Lleno</option>
+            <option value="dañado">Dañado</option>
+            <option value="mal olor">Mal olor</option>
+        </select>
+    </div>
+    <div class="col-12">
+        <label asp-for="NuevoReporte.Comentario" class="form-label">Comentario</label>
+        <textarea asp-for="NuevoReporte.Comentario" class="form-control" rows="3" maxlength="500"></textarea>
+    </div>
+    <div class="col-12">
+        <button type="submit" class="btn btn-success">Enviar reporte</button>
+    </div>
+</form>
+
+<h2 class="h4">Historial</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Contenedor</th>
+            <th>Problema</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var reporte in Model.Reportes)
+        {
+            <tr>
+                <td>@reporte.ContenedorId</td>
+                <td>@reporte.TipoReporte</td>
+                <td>@reporte.Fecha.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                <td>@reporte.Estado</td>
+            </tr>
+        }
+    </tbody>
+</table>
+}

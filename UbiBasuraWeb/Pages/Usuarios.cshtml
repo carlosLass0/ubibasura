@@ -1,0 +1,48 @@
+@page
+@model UsuariosModel
+@{
+    ViewData["Title"] = "Gestionar usuarios";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Gestionar usuarios</h1>
+    <a asp-page="/Dashboard" class="btn btn-outline-secondary">Dashboard</a>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Mensaje))
+{
+    <div class="alert alert-warning" role="alert">@Model.Mensaje</div>
+}
+
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Rol</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var usuario in Model.Usuarios)
+            {
+                <tr>
+                    <td>@usuario.Nombre</td>
+                    <td>@usuario.Correo</td>
+                    <td>@(usuario.Rol == "administrador" ? "Administrador" : "Usuario")</td>
+                    <td>
+                        <form method="post" asp-page-handler="CambiarRol" class="d-flex gap-2">
+                            <input type="hidden" name="UsuarioId" value="@usuario.Id">
+                            <select name="NuevoRol" class="form-select form-select-sm" aria-label="Rol de @usuario.Nombre">
+                                <option value="usuario" selected="@(usuario.Rol == "usuario")">Usuario</option>
+                                <option value="administrador" selected="@(usuario.Rol == "administrador")">Administrador</option>
+                            </select>
+                            <button type="submit" class="btn btn-sm btn-outline-primary">Guardar</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

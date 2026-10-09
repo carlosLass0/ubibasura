@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UbiBasura - Mapa</title>
+    <link rel="stylesheet" href="css/mapa.css">
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAc5Fc6eHGnH3rxbke6qJfQHcKM7yRb2-E&callback=initMap" async defer></script>
+  </head>
+  <body>
+
+    <header>
+      <h1>🗑️ UbiBasura</h1>
+      <nav>
+        <a href="mapa.html">Mapa</a>
+        <a href="reportes.html">Mis reportes</a>
+        <a href="index.html">Cerrar sesión</a>
+      </nav>
+    </header>
+
+    <main>
+      <div id="mapa"></div>
+    </main>
+
+    <script>
+      function initMap() {
+        const popayan = { lat: 2.4448, lng: -76.6147 };
+
+        const mapa = new google.maps.Map(document.getElementById("mapa"), {
+          center: popayan,
+          zoom: 14
+        });
+    const contenedores = [
+  { lat: 2.4448, lng: -76.6147, titulo: "C-001 - Orgánico", color: "green" },
+  { lat: 2.4430, lng: -76.6120, titulo: "C-002 - Reciclable", color: "blue" },
+  { lat: 2.4460, lng: -76.6180, titulo: "C-003 - General", color: "gray" },
+  { lat: 2.4410, lng: -76.6090, titulo: "C-004 - Peligroso", color: "red" },
+];
+const infoWindow = new google.maps.InfoWindow();
+
+contenedores.forEach(function(c) {
+  const marcador = new google.maps.Marker({
+    position: { lat: c.lat, lng: c.lng },
+    map: mapa,
+    title: c.titulo
+  });
+
+  marcador.addListener("click", function() {
+    infoWindow.setContent(
+      "<b>" + c.titulo + "</b><br>Estado: Disponible"
+    );
+    infoWindow.open(mapa, marcador);
+  });
+});
+      }
+    </script>
+
+  </body>
+</html>

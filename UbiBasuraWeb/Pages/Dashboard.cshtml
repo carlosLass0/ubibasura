@@ -1,0 +1,42 @@
+@page
+@model DashboardModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="text-center">
+    <h1>Dashboard de administrador</h1>
+    <p>Bienvenido a UbiBasura.</p>
+</div>
+
+<div class="row g-3 mt-3">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h2 class="h5">Contenedores</h2>
+                <p class="display-6">@Model.TotalContenedores</p>
+                <a asp-page="/Mapa" class="btn btn-outline-success">Ver mapa</a>
+                <a asp-page="/Contenedores" class="btn btn-outline-secondary">Gestionar</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h2 class="h5">Reportes</h2>
+                <p class="display-6">@Model.TotalReportes</p>
+                <a asp-page="/Reportes" class="btn btn-outline-success">Ver reportes</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h2 class="h5">Usuarios</h2>
+                <p class="display-6">@Model.TotalUsuarios</p>
+                <p class="mb-0">@Model.ReportesPendientes reportes pendientes</p>
+                <a asp-page="/Usuarios" class="btn btn-outline-secondary mt-3">Gestionar usuarios</a>
+            </div>
+        </div>
+    </div>
+</div>

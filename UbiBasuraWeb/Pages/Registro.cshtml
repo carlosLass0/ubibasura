@@ -1,0 +1,45 @@
+@page
+@model RegistroModel
+@{
+    ViewData["Title"] = "Crear cuenta";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UbiBasura - Registro</title>
+    <link rel="stylesheet" href="~/css/login.css">
+</head>
+<body>
+    <div>
+        <h1>UbiBasura</h1>
+        <p>Crea tu cuenta</p>
+
+        @if (!string.IsNullOrEmpty(Model.Mensaje))
+        {
+            <p style="color: #b00020; text-align: center;">@Model.Mensaje</p>
+        }
+
+        <form method="post">
+            <label asp-for="Nombre">Nombre completo</label>
+            <input asp-for="Nombre" placeholder="Tu nombre" required>
+
+            <label asp-for="Correo">Correo electrónico</label>
+            <input asp-for="Correo" type="email" placeholder="tucorreo@email.com" required>
+
+            <label asp-for="Contrasena">Contraseña</label>
+            <input asp-for="Contrasena" type="password" placeholder="Tu contraseña" minlength="6" required>
+
+            <button type="submit">Registrarme</button>
+        </form>
+
+        <p style="margin-top: 16px; text-align: center;">
+            ¿Ya tienes cuenta?
+            <a href="/Login" style="color: #2E7D32;">Inicia sesión</a>
+        </p>
+    </div>
+</body>
+</html>

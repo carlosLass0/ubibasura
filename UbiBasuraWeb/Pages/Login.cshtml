@@ -1,0 +1,41 @@
+﻿@page
+@model UbiBasuraWeb.Pages.LoginModel
+@{
+    ViewData["Title"] = "Iniciar Sesión";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UbiBasura - Login</title>
+    <link rel="stylesheet" href="~/css/login.css">
+</head>
+<body>
+    <div>
+        <h1>🗑️ UbiBasura</h1>
+        <p>Inicia sesión para continuar</p>
+        @if (!string.IsNullOrEmpty(Model.Mensaje)) 
+        {
+    <p style="color: red; text-align: center;">@Model.Mensaje</p>
+        }
+
+        <form method="post">
+            <label>Correo electrónico</label>
+            <input type="email" name="Correo" placeholder="tucorreo@email.com">
+
+            <label>Contraseña</label>
+            <input type="password" name="Contrasena" placeholder="Tu contraseña">
+
+            <button type="submit">Ingresar</button>
+        </form>
+
+        <p style="margin-top: 16px; text-align: center;">
+            ¿No tienes cuenta?
+            <a href="/Registro" style="color: #2E7D32;">Regístrate</a>
+        </p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,126 @@
+@page
+@model ContenedoresModel
+@{
+    ViewData["Title"] = "Contenedores";
+}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="~/css/mapa.css" asp-append-version="true" />
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Gestionar contenedores</h1>
+    <a asp-page="/Dashboard" class="btn btn-outline-secondary">Dashboard</a>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Mensaje))
+{
+    <div class="alert alert-warning">@Model.Mensaje</div>
+}
+
+<form method="post" asp-page-handler="Agregar" class="row g-3 mb-4">
+    <div class="col-md-2">
+        <label asp-for="NuevoContenedor.Codigo" class="form-label">Código</label>
+        <input asp-for="NuevoContenedor.Codigo" class="form-control" placeholder="C-005" maxlength="30" required>
+    </div>
+    <div class="col-md-3">
+        <label asp-for="NuevoContenedor.Tipo" class="form-label">Tipo</label>
+        <select asp-for="NuevoContenedor.Tipo" class="form-select">
+            <option value="organico">Orgánico</option>
+            <option value="reciclable">Reciclable</option>
+            <option value="general">General</option>
+            <option value="peligroso">Peligroso</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label asp-for="NuevoContenedor.Latitud" class="form-label">Latitud</label>
+        <input asp-for="LatitudSeleccionada" class="form-control" type="text" inputmode="decimal" readonly required>
+    </div>
+    <div class="col-md-2">
+        <label asp-for="NuevoContenedor.Longitud" class="form-label">Longitud</label>
+        <input asp-for="LongitudSeleccionada" class="form-control" type="text" inputmode="decimal" readonly required>
+    </div>
+    <div class="col-md-2">
+        <label asp-for="NuevoContenedor.Estado" class="form-label">Estado</label>
+        <select asp-for="NuevoContenedor.Estado" class="form-select">
+            <option value="disponible">Disponible</option>
+            <option value="lleno">Lleno</option>
+            <option value="dañado">Dañado</option>
+        </select>
+    </div>
+    <div class="col-md-1 d-flex align-items-end">
+        <button type="submit" class="btn btn-success">Agregar</button>
+    </div>
+    <div class="col-12">
+        <label class="form-label" for="selectorUbicacion">Ubicación del contenedor</label>
+        <p class="form-text mt-0">Haz clic en el mapa o arrastra el marcador para elegir el punto exacto.</p>
+        <div id="selectorUbicacion" class="mapa-canvas contenedor-location-map" aria-label="Seleccionar ubicación del contenedor en el mapa"></div>
+    </div>
+</form>
+
+<table class="table table-striped align-middle">
+    <thead>
+        <tr>
+            <th>Código</th>
+            <th>Tipo</th>
+            <th>Ubicación</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var contenedor in Model.Contenedores)
+        {
+            <tr>
+                <td>@contenedor.Codigo</td>
+                <td>@contenedor.Tipo</td>
+                <td>@contenedor.Latitud, @contenedor.Longitud</td>
+                <td>
+                    <form method="post" asp-page-handler="Estado" class="d-flex gap-2">
+                        <input type="hidden" name="ContenedorId" value="@contenedor.Id">
+                        <select name="NuevoEstado" class="form-select form-select-sm">
+                            <option selected="@(contenedor.Estado == "disponible")" value="disponible">Disponible</option>
+                            <option selected="@(contenedor.Estado == "lleno")" value="lleno">Lleno</option>
+                            <option selected="@(contenedor.Estado == "dañado")" value="dañado">Dañado</option>
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-outline-primary">Guardar</button>
+                    </form>
+                </td>
+                <td>
+                    <form method="post" asp-page-handler="Eliminar" onsubmit="return confirm('¿Eliminar este contenedor?');">
+                        <input type="hidden" name="ContenedorId" value="@contenedor.Id">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const ubicacionInicial = [2.4448, -76.6147];
+        const selectorUbicacion = L.map("selectorUbicacion").setView(ubicacionInicial, 15);
+
+        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(selectorUbicacion);
+
+        const campoLatitud = document.getElementById("LatitudSeleccionada");
+        const campoLongitud = document.getElementById("LongitudSeleccionada");
+        const marcadorUbicacion = L.marker(ubicacionInicial, { draggable: true }).addTo(selectorUbicacion);
+
+        function actualizarCoordenadas(latlng) {
+            campoLatitud.value = latlng.lat.toFixed(6);
+            campoLongitud.value = latlng.lng.toFixed(6);
+        }
+
+        actualizarCoordenadas(marcadorUbicacion.getLatLng());
+        selectorUbicacion.on("click", evento => {
+            marcadorUbicacion.setLatLng(evento.latlng);
+            actualizarCoordenadas(evento.latlng);
+        });
+        marcadorUbicacion.on("dragend", () => actualizarCoordenadas(marcadorUbicacion.getLatLng()));
+    </script>
+}

@@ -1,0 +1,85 @@
+@page
+@model MapaModel
+@using System.Text.Json
+@{
+    ViewData["Title"] = "Mapa";
+    var contenedoresJson = JsonSerializer.Serialize(Model.Contenedores.Select(contenedor => new
+    {
+        lat = contenedor.Latitud,
+        lng = contenedor.Longitud,
+        titulo = $"{contenedor.Codigo} - {contenedor.Tipo}",
+        estado = contenedor.Estado
+    }));
+}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="~/css/mapa.css" asp-append-version="true" />
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Mapa de contenedores</h1>
+    <a class="btn btn-outline-success" href="/Reportes">Mis reportes</a>
+</div>
+
+<div class="mapa-toolbar">
+    <div class="mapa-leyenda" aria-label="Estados de los contenedores">
+        <span class="mapa-leyenda-item"><span class="mapa-punto mapa-punto-disponible"></span>Disponible</span>
+        <span class="mapa-leyenda-item"><span class="mapa-punto mapa-punto-lleno"></span>Lleno</span>
+        <span class="mapa-leyenda-item"><span class="mapa-punto mapa-punto-danado"></span>Dañado</span>
+    </div>
+    <span class="mapa-zona">Popayán, Cauca</span>
+</div>
+
+<div id="mapa" class="mapa-canvas" aria-label="Mapa de contenedores de residuos"></div>
+
+@section Scripts {
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const contenedores = @Html.Raw(contenedoresJson);
+        const mapa = L.map("mapa").setView([2.4448, -76.6147], 14);
+
+        L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(mapa);
+
+        function obtenerEstiloEstado(estado) {
+            switch (estado.toLocaleLowerCase("es")) {
+                case "lleno":
+                    return { color: "#c87528", etiqueta: "Lleno", clase: "lleno" };
+                case "dañado":
+                    return { color: "#bd4851", etiqueta: "Dañado", clase: "danado" };
+                default:
+                    return { color: "#24836f", etiqueta: "Disponible", clase: "disponible" };
+            }
+        }
+
+        const marcadores = contenedores.map(contenedor => {
+            const estiloEstado = obtenerEstiloEstado(contenedor.estado);
+            const contenidoPopup = document.createElement("div");
+            const titulo = document.createElement("strong");
+            titulo.textContent = contenedor.titulo;
+            const estado = document.createElement("div");
+            estado.className = `mapa-popup-estado mapa-popup-estado-${estiloEstado.clase}`;
+            estado.textContent = estiloEstado.etiqueta;
+            contenidoPopup.className = "mapa-popup";
+            contenidoPopup.append(titulo, estado);
+
+            return L.circleMarker([contenedor.lat, contenedor.lng], {
+                radius: 9,
+                color: "#ffffff",
+                weight: 3,
+                fillColor: estiloEstado.color,
+                fillOpacity: 1
+            })
+                .addTo(mapa)
+                .bindPopup(contenidoPopup)
+                .bindTooltip(contenedor.titulo, { direction: "top", offset: [0, -8] });
+        });
+
+        if (marcadores.length > 1) {
+            mapa.fitBounds(L.featureGroup(marcadores).getBounds().pad(0.25), { maxZoom: 15 });
+        } else if (marcadores.length === 1) {
+            mapa.setView(marcadores[0].getLatLng(), 15);
+        }
+    </script>
+}
